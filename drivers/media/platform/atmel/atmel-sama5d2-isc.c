@@ -552,6 +552,12 @@ static int atmel_isc_probe(struct platform_device *pdev)
 			break;
 	}
 
+	regmap_read(isc->regmap, ISC_VERSION + isc->offsets.version, &ver);
+
+	ret = isc_mc_init(isc, ver);
+	if (ret < 0)
+		goto isc_probe_mc_init_err;
+
 	pm_runtime_set_active(dev);
 	pm_runtime_enable(dev);
 	pm_request_idle(dev);
@@ -571,7 +577,6 @@ static int atmel_isc_probe(struct platform_device *pdev)
 		goto unprepare_clk;
 	}
 
-	regmap_read(isc->regmap, ISC_VERSION + isc->offsets.version, &ver);
 	dev_info(dev, "Microchip ISC version %x\n", ver);
 
 	return 0;
@@ -581,6 +586,9 @@ unprepare_clk:
 
 disable_pm:
 	pm_runtime_disable(dev);
+	
+isc_probe_mc_init_err:
+	isc_mc_cleanup(isc);
 
 cleanup_subdev:
 	isc_subdev_cleanup(isc);
@@ -601,6 +609,8 @@ static int atmel_isc_remove(struct platform_device *pdev)
 	struct isc_device *isc = platform_get_drvdata(pdev);
 
 	pm_runtime_disable(&pdev->dev);
+
+	isc_mc_cleanup(isc);
 
 	isc_subdev_cleanup(isc);
 
