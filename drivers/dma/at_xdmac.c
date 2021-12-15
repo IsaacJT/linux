@@ -1612,6 +1612,8 @@ static void at_xdmac_handle_cyclic(struct at_xdmac_chan *atchan)
 	struct dma_async_tx_descriptor	*txd;
 
 	spin_lock_irq(&atchan->lock);
+	dev_dbg(chan2dev(&atchan->chan), "%s: status=0x%08x\n",
+		__func__, atchan->irq_status);
 	if (list_empty(&atchan->xfers_list)) {
 		spin_unlock_irq(&atchan->lock);
 		return;
@@ -1624,6 +1626,7 @@ static void at_xdmac_handle_cyclic(struct at_xdmac_chan *atchan)
 		dmaengine_desc_get_callback_invoke(txd, NULL);
 }
 
+/* Called with atchan->lock held. */
 static void at_xdmac_handle_error(struct at_xdmac_chan *atchan)
 {
 	struct at_xdmac		*atxdmac = to_at_xdmac(atchan->chan.device);
@@ -1642,8 +1645,6 @@ static void at_xdmac_handle_error(struct at_xdmac_chan *atchan)
 	if (atchan->irq_status & AT_XDMAC_CIS_ROIS)
 		dev_err(chan2dev(&atchan->chan), "request overflow error!!!");
 
-	spin_lock_irq(&atchan->lock);
-
 	/* Channel must be disabled first as it's not done automatically */
 	at_xdmac_write(atxdmac, AT_XDMAC_GD, atchan->mask);
 	while (at_xdmac_read(atxdmac, AT_XDMAC_GS) & atchan->mask)
@@ -1652,8 +1653,6 @@ static void at_xdmac_handle_error(struct at_xdmac_chan *atchan)
 	bad_desc = list_first_entry(&atchan->xfers_list,
 				    struct at_xdmac_desc,
 				    xfer_node);
-
-	spin_unlock_irq(&atchan->lock);
 
 	/* Print bad descriptor's details if needed */
 	dev_dbg(chan2dev(&atchan->chan),
@@ -1671,14 +1670,16 @@ static void at_xdmac_tasklet(struct tasklet_struct *t)
 	struct dma_async_tx_descriptor *txd;
 	u32			error_mask;
 
-	dev_dbg(chan2dev(&atchan->chan), "%s: status=0x%08x\n",
-		__func__, atchan->irq_status);
-
 	if (at_xdmac_chan_is_cyclic(atchan))
 		return at_xdmac_handle_cyclic(atchan);
 
 	error_mask = AT_XDMAC_CIS_RBEIS | AT_XDMAC_CIS_WBEIS |
 		AT_XDMAC_CIS_ROIS;
+
+	spin_lock_irq(&atchan->lock);
+
+	dev_dbg(chan2dev(&atchan->chan), "%s: status=0x%08x\n",
+		__func__, atchan->irq_status);
 
 	if (!(atchan->irq_status & AT_XDMAC_CIS_LIS) &&
 	    !(atchan->irq_status & error_mask))
@@ -1687,7 +1688,6 @@ static void at_xdmac_tasklet(struct tasklet_struct *t)
 	if (atchan->irq_status & error_mask)
 		at_xdmac_handle_error(atchan);
 
-	spin_lock_irq(&atchan->lock);
 	desc = list_first_entry(&atchan->xfers_list, struct at_xdmac_desc,
 				xfer_node);
 	dev_vdbg(chan2dev(&atchan->chan), "%s: desc 0x%p\n", __func__, desc);
