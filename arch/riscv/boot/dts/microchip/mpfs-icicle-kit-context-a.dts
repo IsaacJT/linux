@@ -258,6 +258,10 @@
 	status = "okay";
 };
 
+&qspi {
+        status = "okay";
+};
+
 &refclk {
 	clock-frequency = <125000000>;
 };
