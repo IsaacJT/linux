@@ -1,0 +1,6 @@
+linux (5.15.0-52.58-polarfire-ppa1) jammy; urgency=medium
+
+  * New derivative for the Microchip Polarfire based on:
+    https://github.com/linux4microchip/linux/tree/linux-5.15-mchp+fpga
+
+ -- Isaac True <isaac.true@canonical.com>  Wed, 08 Feb 2023 10:52:50 +0000
