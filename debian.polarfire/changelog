@@ -1,3 +1,10 @@
+linux-riscv (5.15.0-1027.31-polarfire-ppa1) jammy; urgency=medium
+
+  * Rebase of the Microchip 5.15 kernel sources on top of the Jammy kernel
+    https://github.com/linux4microchip/linux/tree/linux-5.15-mchp+fpga
+
+ -- Isaac True <isaac.true@canonical.com>  Thu, 09 Feb 2023 09:33:32 +0000
+
 linux-riscv (5.15.0-1027.31) jammy; urgency=medium
 
   * jammy/linux-riscv: 5.15.0-1027.31 -proposed tracker (LP: #1997733)
