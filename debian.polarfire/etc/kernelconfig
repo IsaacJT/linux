@@ -1,2 +1,7 @@
-archs="riscv64"
-family='ubuntu'
+if [ "$variant" = "ports" ]; then
+	archs=""
+	family='ports'
+else
+	archs="riscv64"
+	family='ubuntu'
+fi
