@@ -1,4 +1,4 @@
-linux-riscv (5.15.0-1027.31-polarfire-ppa1) jammy; urgency=medium
+linux-riscv (5.15.0-1027.31-polarfire-ppa3) jammy; urgency=medium
 
   * Rebase of the Microchip 5.15 kernel sources on top of the Jammy kernel
     https://github.com/linux4microchip/linux/tree/linux-5.15-mchp+fpga

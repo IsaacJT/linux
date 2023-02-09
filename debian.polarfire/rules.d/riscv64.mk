@@ -1,7 +1,7 @@
 human_arch      = RISC-V
 build_arch      = riscv
 header_arch     = $(build_arch)
-defconfig       = defconfig
+defconfig       = mpfs_defconfig
 flavours        = generic
 build_image	= Image
 kernel_file	= arch/$(build_arch)/boot/Image
@@ -20,4 +20,6 @@ do_tools_bpftool    = true
 
 do_dtbs           = true
 
-skipabi           = true
+skipabi             = true
+do_libc_dev_package = false
+disable_d_i         = true
